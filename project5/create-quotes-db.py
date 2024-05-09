@@ -1,3 +1,4 @@
+
 # Create a Mongita database with movie information
 import json
 from mongita import MongitaClientDisk
