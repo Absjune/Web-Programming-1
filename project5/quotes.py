@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, make_response, redirect
 from mongita import MongitaClientDisk
 from bson import ObjectId
-from datetime import datetime
 
 from passwords import hash_password  # (password) -> hashed_password, salt
 from passwords import check_password # (password, saved_hashed_password, salt):
@@ -41,7 +40,7 @@ def get_quotes():
     quotes_collection = quotes_db.quotes_collection
     # load the data
     data = list(quotes_collection.find({"owner": user}))
-    publicdata = list(quotes_collection.find({"$and": [{"public": True}, {"owner": {"$ne": user}}]}))
+    publicdata = list(quotes_collection.find({"public": True}))
     data = data + publicdata
     for item in data:
         item["_id"] = str(item["_id"])
@@ -171,15 +170,11 @@ def post_add():
     text = request.form.get("text", "")
     author = request.form.get("author", "")
     public = request.form.get("public", "") == "on"
-    comments = request.form.get("comments", "") == "on"
     if text != "" and author != "":
         # open the quotes collection
         quotes_collection = quotes_db.quotes_collection
-        # add date to author
-        current_date = datetime.now().date()
-        author = author + " - " + str(current_date)
         # insert the quote
-        quote_data = {"owner": user, "text": text, "author": author, "public":public, "comments":comments}
+        quote_data = {"owner": user, "text": text, "author": author, "public":public}
         print(quote_data)
         quotes_collection.insert_one(quote_data)
     # usually do a redirect('....')
